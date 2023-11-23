@@ -18,7 +18,7 @@ class AssetController(MainController):
         return asset
 
     def create_asset_profile(self, profile_name):
-        tenant_id = get_tenant_entity_id(self.tb_client)    
+        tenant_id = self.tb_client.get_user().tenant_id  
         asset_profile = AssetProfile(name=profile_name, description=profile_name, tenant_id=tenant_id)
         return self.tb_client.save_asset_profile(asset_profile)
         
@@ -41,14 +41,14 @@ class AssetController(MainController):
         for profile in profiles.data:
             if profile.name == profile_name:
                 return profile
-        raise GenericException("Profile: " + profile_name + ", with profile type: " + profile_type + ", does not exist.")
+        raise TBWrapperException("Profile: " + profile_name +" does not exist.")
 
     def get_asset_profile_by_name(self, profile_name):
         profiles = self.tb_client.get_asset_profiles(page=0, page_size=1000)
         for profile in profiles.data:
             if profile.name == profile_name:
                 return profile
-        raise GenericException("Profile: " + profile_name + " does not exist.")
+        raise TBWrapperException("Profile: " + profile_name + " does not exist.")
 
     def save_asset_attributes(self, asset_id, scope, body):
         return self.tb_client.save_entity_attributes_v2(asset_id, scope, body)
