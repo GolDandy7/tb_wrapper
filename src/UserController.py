@@ -1,6 +1,6 @@
-from MainController import MainController
+from src.MainController import MainController
 from tb_rest_client.rest_client_ce import *
-from handle_exception import *
+from src.handle_exception import *
 
 @handle_tb_wrapper_exception
 class UserController(MainController):
