@@ -14,10 +14,11 @@ class DeviceController(MainController):
 
     def check_device_exists_by_name(self, device_name):
         info_device = self.tb_client.get_tenant_device_infos(page_size=10000, page=0)
+        found = False
         for info in info_device.data:
             if info.name == device_name:
-                return True
-        return False
+                found = True
+        return found
 
     def create_device_with_customer(self, device_profile_id, device_name, customer_obj_id):
         device = Device(name=device_name, device_profile_id=device_profile_id, customer_id=customer_obj_id)
