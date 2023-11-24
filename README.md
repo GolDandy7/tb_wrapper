@@ -8,7 +8,31 @@ This wrapper allows us to use the Python API of Thingsboard. It is a IoT Platfor
 ```sh
 pip install tb_wrapper
 ```
-## Features
+### Features
 - Manage Entities such as Devices and Assets
 - Access to thingsboard account using credentials stored into files
 - Create Alarms 
+
+
+## Build
+- Requirements [twine](https://twine.readthedocs.io/en/stable/)
+- Requirements [python](https://www.python.org/)
+- Requirements [setuptools](https://pypi.org/project/setuptools/)
+
+
+### Steps
+
+First of all, change the version of the release to the latest version at the pyproject.toml file
+```
+[project]
+name = "<my project name>"
+version = "<my-version"
+```
+Create the dist directory used to upload the package into Pypi
+```sh
+python -m build
+```
+Upload the new version of the package using twine
+```sh
+twine upload dist/*
+```
