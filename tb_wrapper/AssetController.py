@@ -1,6 +1,6 @@
-from MainController import MainController
+from tb_wrapper.MainController import MainController
 from tb_rest_client.rest_client_ce import *
-from handle_exception import *
+from tb_wrapper.handle_exception import *
 
 @handle_tb_wrapper_exception
 class AssetController(MainController):
@@ -23,18 +23,22 @@ class AssetController(MainController):
         return self.tb_client.save_asset_profile(asset_profile)
         
     def check_asset_exists_by_name(self, asset_name):
+        found = False
         info_asset = self.tb_client.get_tenant_asset_infos(page_size=10000, page=0)
         for info in info_asset.data:
             if info.name == asset_name:
-                return True
-        return False
+                found = True
+                break
+        return found
 
     def check_asset_profile_exists_by_name(self, profile_name):
+        found = False
         profiles = self.tb_client.get_asset_profiles(page=0, page_size=1000)
         for profile in profiles.data:
             if profile.name == profile_name:
-                return True
-        return False
+                found = True
+                break
+        return found
 
     def get_asset_profile_by_name(self, profile_name):
         profiles = self.tb_client.get_asset_profiles(page=0, page_size=1000)

@@ -1,6 +1,6 @@
-from MainController import MainController
+from tb_wrapper.MainController import MainController
 from tb_rest_client.rest_client_ce import *
-from handle_exception import *
+from tb_wrapper.handle_exception import *
 
 @handle_tb_wrapper_exception
 class QueryController(MainController):

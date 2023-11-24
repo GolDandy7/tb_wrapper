@@ -20,12 +20,12 @@ class ConnectionSingleton:
 
     # Viene chiamato solo se la connection non è già stato istanziato
     def getConnection(self, tb_url, userfile, passwordfile):
-            self.tb_connection = RestClientCE(base_url=tb_url)
-            with open(userfile) as f: 
-                USERNAME = f.readline().strip()
-            with open(passwordfile) as f: 
-                PASSWORD = f.readline().strip()
-            return self.tb_connection.login(username=USERNAME, password=PASSWORD)
+        self.tb_connection = RestClientCE(base_url=tb_url)
+        with open(userfile) as f: 
+            USERNAME = f.readline().strip()
+        with open(passwordfile) as f: 
+            PASSWORD = f.readline().strip()
+        return self.tb_connection.login(username=USERNAME, password=PASSWORD)
     
     def get_client(self):
         return self.tb_connection
