@@ -1,6 +1,6 @@
 # Tb_wrapper
 ## _Description_
-This wrapper allows us to use the Python API of Thingsboard. It is a IoT Platform used for project ZOE.
+This wrapper allows us to use the Python API client of Thingsboard.
 ## Installation
 
 - TB wrapper requirements [tb_rest_client](https://pypi.org/project/tb-rest-client/)
