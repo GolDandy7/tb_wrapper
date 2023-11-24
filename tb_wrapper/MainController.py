@@ -1,4 +1,4 @@
-from src.ConnectionSingleton import *
+from tb_wrapper.ConnectionSingleton import *
 
 class MainController:
     tb_client = None

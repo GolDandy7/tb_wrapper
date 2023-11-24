@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import MagicMock
-from src.UserController import UserController
+from tb_wrapper.UserController import UserController
 
 @pytest.fixture
 def user_controller():

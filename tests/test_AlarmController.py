@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import MagicMock
-from src.AlarmController import AlarmController
+from tb_wrapper.AlarmController import AlarmController
 
 @pytest.fixture
 def alarm_controller():
@@ -10,36 +10,35 @@ def alarm_controller():
     return AlarmController(tb_url, userfile, passwordfile)
 
 def test_build_alarm(alarm_controller):
-    tenant_obj_id = "tenant_id"
+
+    tenant_obj = {'entity_type': 'TENANT','id': '94cf0490-f54f-11ed-91d5-ed8a7accb44b'}
+    customer_obj = {'entity_type': 'CUSTOMER','id': '13814000-1dd2-11b2-8080-808080808080'}
+    entity_orginator = {'entity_type': 'ASSET', 'id': '774f8440-8946-11ee-9593-fbf738de8bd6'}
     alarm_name = "alarm_name"
     alarm_type = "alarm_type"
-    entity_orginator = "entity_orginator"
-    customer_obj_id = "customer_obj_id"
     severity_alarm = "INDETERMINATE"
     alarm_status = "ACTIVE_ACK"
     ack = True
     clear = False
 
-    expected_alarm = {
-        "tenant_id": tenant_obj_id,
-        "name": alarm_name,
-        "type": alarm_type,
-        "originator": entity_orginator,
-        "customer_id": customer_obj_id,
-        "severity": severity_alarm,
-        "status": alarm_status,
-        "acknowledged": ack,
-        "cleared": clear
-    }
+    result = alarm_controller.build_alarm(tenant_obj, alarm_name, alarm_type, entity_orginator, 
+                            customer_obj, severity_alarm, alarm_status, ack, clear)
     
-    assert alarm_controller.build_alarm(tenant_obj_id, alarm_name, alarm_type, entity_orginator, 
-                            customer_obj_id, severity_alarm, alarm_status, ack, clear) is not None
+    assert result is not None
+    assert result.tenant_id == tenant_obj
+    assert result.customer_id == customer_obj
+    assert result.originator == entity_orginator
+    assert result.name == alarm_name
+    assert result.status == alarm_status
+    assert result.type == alarm_type
+    assert result.severity == severity_alarm
+    assert result.acknowledged == ack
+    assert result.cleared == clear
 
 def test_save_alarm(alarm_controller):
+
     alarm_controller.tb_client.save_alarm = MagicMock(return_value="mocked_result")
-
     alarm = {"mock": "alarm"}
-
     result = alarm_controller.save_alarm(alarm)
-
     assert result is not None 
+
