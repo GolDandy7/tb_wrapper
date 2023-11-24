@@ -36,3 +36,4 @@ Upload the new version of the package using twine
 ```sh
 twine upload dist/*
 ```
+and use Username and Password based on API Token
