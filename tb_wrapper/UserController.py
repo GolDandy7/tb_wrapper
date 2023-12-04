@@ -1,13 +1,12 @@
-from tb_wrapper.MainController import MainController
-from tb_rest_client.rest_client_ce import *
 from tb_wrapper.handle_exception import *
+from tb_wrapper.MainController import *
+
 
 @handle_tb_wrapper_exception
 class UserController(MainController):
-    tb_client = None
-    
-    def __init__(self, tb_url, userfile, passwordfile):
-        super().__init__(tb_url, userfile, passwordfile)
+
+    def __init__(self, tb_url=None, userfile=None, passwordfile=None, connection=None):
+        super().__init__(tb_url, userfile, passwordfile, connection)
 
     def actual_user(self):
         return self.tb_client.get_user()
