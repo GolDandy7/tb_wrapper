@@ -2,12 +2,12 @@ from tb_wrapper.handle_exception import *
 from tb_wrapper.MainController import *
 
 
-@handle_tb_wrapper_exception
 class QueryController(MainController):
 
     def __init__(self, tb_url=None, userfile=None, passwordfile=None, connection=None):
         super().__init__(tb_url, userfile, passwordfile, connection)
 
+    @handle_tb_wrapper_exception
     def query_body_attribute(self, filter_key_scope, filter_key_name, filter_key_value, filter_key_type):
         predicate = {"operation": "EQUAL",
                      "value": {"defaultValue": filter_key_value},
@@ -29,6 +29,7 @@ class QueryController(MainController):
 
         return body
 
+    @handle_tb_wrapper_exception
     def find_customers_by_attribute(self, filter_key_scope, filter_key_name, filter_key_value, filter_key_type):
         body = self.query_body_attribute(
             filter_key_scope, filter_key_name, filter_key_value, filter_key_type)

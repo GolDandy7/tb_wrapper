@@ -50,14 +50,6 @@ class AssetController(MainController):
         raise TBWrapperException(
             "Profile: " + profile_name + " does not exist.")
 
-    def get_asset_profile_by_name(self, profile_name):
-        profiles = self.tb_client.get_asset_profiles(page=0, page_size=1000)
-        for profile in profiles.data:
-            if profile.name == profile_name:
-                return profile
-        raise TBWrapperException(
-            "Profile: " + profile_name + " does not exist.")
-
     def save_asset_attributes(self, asset_id, scope, body):
         return self.tb_client.save_entity_attributes_v2(asset_id, scope, body)
 

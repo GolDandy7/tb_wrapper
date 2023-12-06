@@ -1,87 +1,244 @@
 import pytest
-from unittest.mock import MagicMock
+import unittest
+
+from unittest.mock import Mock, patch
 from tb_wrapper.DeviceController import DeviceController
 
-device_info_result = {'data': [{'active': False,
-           'additional_info': None,
-           'created_time': 1697205661205,
-           'customer_id': {'entity_type': 'CUSTOMER',
-                           'id': '13814000-1dd2-11b2-8080-808080808080'},
-           'customer_is_public': False,
-           'customer_title': None,
-           'device_data': {'configuration': {'type': 'DEFAULT'},
-                           'transport_configuration': {'type': 'DEFAULT'}},
-           'device_profile_id': {'entity_type': 'DEVICE_PROFILE',
-                                 'id': '94dbfce0-f54f-11ed-91d5-ed8a7accb44b'},
-           'device_profile_name': 'default',
-           'firmware_id': None,
-           'id': {'entity_type': 'DEVICE',
-                  'id': 'f0f95450-69d0-11ee-8bf0-899ee6c3e465'},
-           'label': None,
-           'name': 'prometheus',
-           'software_id': None,
-           'tenant_id': {'entity_type': 'TENANT',
-                         'id': '94cf0490-f54f-11ed-91d5-ed8a7accb44b'},
-           'type': 'default'}],
- 'has_next': False,
- 'total_elements': 11,
- 'total_pages': 1}
 
-
-
-@pytest.fixture
-def device_controller():
+def get_env():
+    env = dict()
     tb_url = 'http://217.76.51.6:9090'
     userfile = 'user.secrets'
     passwordfile = 'pass.secrets'
-    return DeviceController(tb_url, userfile, passwordfile)
+    env['tb_url'] = tb_url
+    env['userfile'] = userfile
+    env['passwordfile'] = passwordfile
 
-def test_get_tenant_device(device_controller):
+    env['device_info_result_byname'] = {'data': [{'active': False,
+                                                  'additional_info': None,
+                                                  'created_time': 1697205661205,
+                                                  'customer_id': {'entity_type': 'CUSTOMER',
+                                                                  'id': '13814000-1dd2-11b2-8080-808080808080'},
+                                                  'customer_is_public': False,
+                                                  'customer_title': None,
+                                                  'device_data': {'configuration': {'type': 'DEFAULT'},
+                                                                  'transport_configuration': {'type': 'DEFAULT'}},
+                                                  'device_profile_id': {'entity_type': 'DEVICE_PROFILE',
+                                                                        'id': '94dbfce0-f54f-11ed-91d5-ed8a7accb44b'},
+                                                  'device_profile_name': 'default',
+                                                  'firmware_id': None,
+                                                  'id': {'entity_type': 'DEVICE',
+                                                         'id': 'f0f95450-69d0-11ee-8bf0-899ee6c3e465'},
+                                                  'label': None,
+                                                  'name': 'prometheus',
+                                                  'software_id': None,
+                                                  'tenant_id': {'entity_type': 'TENANT',
+                                                                'id': '94cf0490-f54f-11ed-91d5-ed8a7accb44b'},
+                                                  'type': 'default'}],
+                                        'has_next': False,
+                                        'total_elements': 11,
+                                        'total_pages': 1}
+    env['device'] = {'additional_info': None,
+                     'created_time': None,
+                     'customer_id': {'entity_type': 'CUSTOMER',
+                                     'id': '9567e930-f54f-11ed-91d5-ed8a7accb44b'},
+                     'device_data': None,
+                     'device_profile_id': {'entity_type': 'DEVICE_PROFILE',
+                                           'id': '94dbfce0-f54f-11ed-91d5-ed8a7accb44b'},
+                     'firmware_id': None,
+                     'id': None,
+                     'label': None,
+                     'name': 'Test_Device01',
+                     'software_id': None,
+                     'tenant_id': None,
+                     'type': None}
+    env['saved_device'] = {'additional_info': None,
+                           'created_time': 1701706697802,
+                           'customer_id': {'entity_type': 'CUSTOMER',
+                                           'id': '9567e930-f54f-11ed-91d5-ed8a7accb44b'},
+                           'device_data': {'configuration': {'type': 'DEFAULT'},
+                                           'transport_configuration': {'type': 'DEFAULT'}},
+                           'device_profile_id': {'entity_type': 'DEVICE_PROFILE',
+                                                 'id': '94dbfce0-f54f-11ed-91d5-ed8a7accb44b'},
+                           'firmware_id': None,
+                           'id': {'entity_type': 'DEVICE', 'id': 'bbd94aa0-92c0-11ee-878c-31ea2d675701'},
+                           'label': None,
+                           'name': 'Test_Device01',
+                           'software_id': None,
+                           'tenant_id': {'entity_type': 'TENANT',
+                                         'id': '94cf0490-f54f-11ed-91d5-ed8a7accb44b'},
+                           'type': 'default'}
+    env['device_nc'] = {'additional_info': None,
+                        'created_time': None,
+                        'customer_id': None,
+                        'device_data': None,
+                        'device_profile_id': {'entity_type': 'DEVICE_PROFILE',
+                                              'id': '94dbfce0-f54f-11ed-91d5-ed8a7accb44b'},
+                        'firmware_id': None,
+                        'id': None,
+                        'label': None,
+                        'name': 'Test_Device01',
+                        'software_id': None,
+                        'tenant_id': None,
+                        'type': None}
+    env['saved_device_nc'] = {'additional_info': None,
+                              'created_time': 1701706697802,
+                              'customer_id': None,
+                              'device_data': {'configuration': {'type': 'DEFAULT'},
+                                              'transport_configuration': {'type': 'DEFAULT'}},
+                              'device_profile_id': {'entity_type': 'DEVICE_PROFILE',
+                                                    'id': '94dbfce0-f54f-11ed-91d5-ed8a7accb44b'},
+                              'firmware_id': None,
+                              'id': {'entity_type': 'DEVICE', 'id': 'bbd94aa0-92c0-11ee-878c-31ea2d675701'},
+                              'label': None,
+                              'name': 'Test_Device01',
+                              'software_id': None,
+                              'tenant_id': {'entity_type': 'TENANT',
+                                            'id': '94cf0490-f54f-11ed-91d5-ed8a7accb44b'},
+                              'type': 'default'}
 
-    device_controller.tb_client.get_tenant_device = MagicMock(return_value="mocked_device")
-    device_name = "test_device"
-    assert device_controller.get_tenant_device(device_name) == "mocked_device"
+    env['default_profile_info'] = {'default_dashboard_id': None,
+                                   'id': {'entity_type': 'DEVICE_PROFILE',
+                                          'id': '94dbfce0-f54f-11ed-91d5-ed8a7accb44b'},
+                                   'image': None,
+                                   'name': 'default',
+                                   'tenant_id': {'entity_type': 'TENANT',
+                                                 'id': '94cf0490-f54f-11ed-91d5-ed8a7accb44b'},
+                                   'transport_type': 'DEFAULT',
+                                   'type': 'DEFAULT'}
+    return env
 
 
-'''def test_check_device_exists_by_name(device_controller):
+class TestDeviceController(unittest.TestCase):
 
-    device_infos = MagicMock()
-    #device_infos = [{"name": "existing_device"}, {"name": "another_device"}]
-    device_infos = device_info_result
-    device_controller.tb_client.get_tenant_device_infos = MagicMock(return_value=device_infos)
-    existing_device_name = "existing_device"
-    another_device_name = "non_existing_device"
-    assert device_controller.check_device_exists_by_name(existing_device_name) is True
-    assert device_controller.check_device_exists_by_name(another_device_name) is False
-'''
-def test_create_device_with_customer(device_controller):
+    @patch('tb_wrapper.MainController.RestClientCE', autospec=True)
+    def test_get_tenant_device(self, mockClient):
+        conn = Mock()
+        conn.login.return_value = conn
+        mockClient.return_value = conn
 
-    device_controller.tb_client.save_device = MagicMock(return_value="mocked_device")
-    device_profile_id = "profile_id"
-    device_name = "test_device"
-    customer_obj_id = "customer_id"
-    result = device_controller.create_device_with_customer(device_profile_id, device_name, customer_obj_id)
-    assert result == "mocked_device"
+        env = get_env()
+        conn.get_tenant_device.return_value = env['device_info_result_byname']
+        device_name = "prometheus"
+        dc = DeviceController(
+            tb_url=env['tb_url'], userfile=env['userfile'], passwordfile=env['passwordfile'])
+        result = dc.get_tenant_device(device_name=device_name)
 
-def test_create_device_without_customer(device_controller):
+        conn.get_tenant_device.assert_called_once_with(device_name)
+        assert result == env['device_info_result_byname']
 
-    device_controller.tb_client.save_device = MagicMock(return_value="mocked_device")
-    device_profile_id = "profile_id"
-    device_name = "test_device"
-    result = device_controller.create_device_without_customer(device_profile_id, device_name)
-    assert result == "mocked_device"
+    @patch('tb_wrapper.MainController.RestClientCE', autospec=True)
+    def test_check_device_exists_by_name(self, mockClient):
 
-def test_save_device_attributes(device_controller):
+        env = get_env()
 
-    device_controller.tb_client.save_device_attributes = MagicMock(return_value="mocked_result")
-    device_id = "device_id"
-    scope = "scope"
-    body = {"attribute": "value"}
-    result = device_controller.save_device_attributes(device_id, scope, body)
-    assert result == "mocked_result"
+        conn = Mock()
+        conn.login.return_value = conn
+        mockClient.return_value = conn
+        mock_names = []
+        for i in range(0, 5):
+            m = Mock()
+            m.name = str(i)
+            mock_names.append(m)
+        mockPageDevice = Mock()
+        mockPageDevice.data = mock_names
 
-def test_get_default_device_profile_info(device_controller):
+        conn.get_tenant_device_infos.return_value = mockPageDevice
+        device_name_true = "0"
+        device_name_false = "10"
+        dc = DeviceController(
+            tb_url=env['tb_url'], userfile=env['userfile'], passwordfile=env['passwordfile'])
+        result_false = dc.check_device_exists_by_name(
+            device_name=device_name_false)
+        result_true = dc.check_device_exists_by_name(
+            device_name=device_name_true)
+        assert result_true == True
+        assert result_false == False
 
-    device_controller.tb_client.get_default_device_profile_info = MagicMock(return_value="mocked_result")
-    result = device_controller.get_default_device_profile_info()
-    assert result == "mocked_result"
+    @patch('tb_wrapper.DeviceController.Device', autospec=True)
+    @patch('tb_wrapper.MainController.RestClientCE', autospec=True)
+    def test_create_device_with_customer(self, mockClient, mockDevice):
+        conn = Mock()
+        conn.login.return_value = conn
+        mockClient.return_value = conn
+
+        c_obj_id = {'entity_type': 'CUSTOMER',
+                    'id': '9567e930-f54f-11ed-91d5-ed8a7accb44b'}
+        name = "Test_Device01"
+        device_profile_id = {'entity_type': 'DEVICE_PROFILE',
+                             'id': '94dbfce0-f54f-11ed-91d5-ed8a7accb44b'}
+
+        env = get_env()
+        mockDevice.return_value = env['device']
+        conn.save_device.return_value = env['saved_device']
+
+        dc = DeviceController(
+            tb_url=env['tb_url'], userfile=env['userfile'], passwordfile=env['passwordfile'])
+        result = dc.create_device_with_customer(
+            device_profile_id=device_profile_id, device_name=name, customer_obj_id=c_obj_id)
+
+        mockDevice.assert_called_once_with(device_profile_id=device_profile_id, name=name,
+                                           customer_id=c_obj_id)
+        assert result == env['saved_device']
+
+    @patch('tb_wrapper.DeviceController.Device', autospec=True)
+    @patch('tb_wrapper.MainController.RestClientCE', autospec=True)
+    def test_create_device_without_customer(self, mockClient, mockDevice):
+        conn = Mock()
+        conn.login.return_value = conn
+        mockClient.return_value = conn
+
+        name = "Test_Device01"
+        device_profile_id = {'entity_type': 'DEVICE_PROFILE',
+                             'id': '94dbfce0-f54f-11ed-91d5-ed8a7accb44b'}
+
+        env = get_env()
+        mockDevice.return_value = env['device_nc']
+        conn.save_device.return_value = env['saved_device_nc']
+
+        dc = DeviceController(
+            tb_url=env['tb_url'], userfile=env['userfile'], passwordfile=env['passwordfile'])
+        result = dc.create_device_without_customer(
+            device_profile_id=device_profile_id, device_name=name)
+
+        mockDevice.assert_called_once_with(
+            device_profile_id=device_profile_id, name=name)
+        assert result == env['saved_device_nc']
+
+    @patch('tb_wrapper.MainController.RestClientCE', autospec=True)
+    def test_save_device_attributes(self, mockClient):
+
+        conn = Mock()
+        conn.login.return_value = conn
+        mockClient.return_value = conn
+
+        env = get_env()
+        device_id = {'entity_type': 'DEVICE',
+                     'id': 'f0f95450-69d0-11ee-8bf0-899ee6c3e465'}
+        scope = "SERVER_SCOPE"
+        body = {'Test': 'test_save_device_attribute'}
+
+        conn.save_device_attributes.return_value = "Attribute updates"
+        dc = DeviceController(
+            tb_url=env['tb_url'], userfile=env['userfile'], passwordfile=env['passwordfile'])
+        result = dc.save_device_attributes(
+            device_id=device_id, scope=scope, body=body)
+
+        conn.save_device_attributes.assert_called_once_with(
+            device_id, scope, body)
+        assert result == "Attribute updates"
+
+    @patch('tb_wrapper.MainController.RestClientCE', autospec=True)
+    def test_get_default_device_profile_info(self, mockClient):
+        conn = Mock()
+        conn.login.return_value = conn
+        mockClient.return_value = conn
+
+        env = get_env()
+        conn.get_default_device_profile_info.return_value = env['default_profile_info']
+
+        dc = DeviceController(
+            tb_url=env['tb_url'], userfile=env['userfile'], passwordfile=env['passwordfile'])
+        result = dc.get_default_device_profile_info()
+
+        assert result == env['default_profile_info']
