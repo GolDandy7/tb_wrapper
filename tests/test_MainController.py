@@ -28,3 +28,14 @@ class TestMainController(unittest.TestCase):
             tb_url=env['tb_url'], userfile=env['userfile'], passwordfile=env['passwordfile'])
         result = mc.destroyConnection()
         assert result == None
+
+    @patch('tb_wrapper.MainController.RestClientCE', autospec=True)
+    def test_destroyConnection_with_conn(self, mockClient):
+        conn = Mock()
+        conn.login.return_value = conn
+        mockClient.return_value = conn
+        conn.logout.return_value = None
+        env = get_env()
+        mc = MainController(connection=conn)
+        result = mc.destroyConnection()
+        assert result == None
