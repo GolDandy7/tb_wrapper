@@ -1,1 +1,5 @@
 temp*.py
+*.secrets
+__pycache__
+dist/
+*.egg-info
