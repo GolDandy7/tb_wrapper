@@ -66,3 +66,26 @@ class TestQueryController(unittest.TestCase):
         result = qc.find_customers_by_attribute(filter_key_scope=filter_key_scope, filter_key_name=filter_key_name,
                                                 filter_key_value=filter_key_value, filter_key_type=filter_key_type)
         assert result == env['result_body']
+
+    @patch("tb_wrapper.QueryController.QueryController.query_body_attribute", autospec=True)
+    @patch("tb_wrapper.MainController.RestClientCE", autospec=True)
+    def test_find_customers_by_attribute_with_conn(self, mockClient, mockBody):
+
+        conn = Mock()
+        conn.login.return_value = conn
+        mockClient.return_value = conn
+
+        env = get_env()
+        filter_key_scope = "SERVER_ATTRIBUTE"
+        filter_key_name = "test"
+        filter_key_value = "test"
+        filter_key_type = "STRING"
+        mockBody.return_value = env['body']
+
+        conn.find_entity_data_by_query.return_value = env['result_body']
+
+        qc = QueryController(connection=conn)
+
+        result = qc.find_customers_by_attribute(filter_key_scope=filter_key_scope, filter_key_name=filter_key_name,
+                                                filter_key_value=filter_key_value, filter_key_type=filter_key_type)
+        assert result == env['result_body']

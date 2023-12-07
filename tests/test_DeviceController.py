@@ -128,6 +128,21 @@ class TestDeviceController(unittest.TestCase):
         assert result == env['device_info_result_byname']
 
     @patch('tb_wrapper.MainController.RestClientCE', autospec=True)
+    def test_get_tenant_device_with_conn(self, mockClient):
+        conn = Mock()
+        conn.login.return_value = conn
+        mockClient.return_value = conn
+
+        env = get_env()
+        conn.get_tenant_device.return_value = env['device_info_result_byname']
+        device_name = "prometheus"
+        dc = DeviceController(connection=conn)
+        result = dc.get_tenant_device(device_name=device_name)
+
+        conn.get_tenant_device.assert_called_once_with(device_name)
+        assert result == env['device_info_result_byname']
+
+    @patch('tb_wrapper.MainController.RestClientCE', autospec=True)
     def test_check_device_exists_by_name(self, mockClient):
 
         env = get_env()
@@ -148,6 +163,33 @@ class TestDeviceController(unittest.TestCase):
         device_name_false = "10"
         dc = DeviceController(
             tb_url=env['tb_url'], userfile=env['userfile'], passwordfile=env['passwordfile'])
+        result_false = dc.check_device_exists_by_name(
+            device_name=device_name_false)
+        result_true = dc.check_device_exists_by_name(
+            device_name=device_name_true)
+        assert result_true == True
+        assert result_false == False
+
+    @patch('tb_wrapper.MainController.RestClientCE', autospec=True)
+    def test_check_device_exists_by_name_with_conn(self, mockClient):
+
+        env = get_env()
+
+        conn = Mock()
+        conn.login.return_value = conn
+        mockClient.return_value = conn
+        mock_names = []
+        for i in range(0, 5):
+            m = Mock()
+            m.name = str(i)
+            mock_names.append(m)
+        mockPageDevice = Mock()
+        mockPageDevice.data = mock_names
+
+        conn.get_tenant_device_infos.return_value = mockPageDevice
+        device_name_true = "0"
+        device_name_false = "10"
+        dc = DeviceController(connection=conn)
         result_false = dc.check_device_exists_by_name(
             device_name=device_name_false)
         result_true = dc.check_device_exists_by_name(
@@ -183,6 +225,31 @@ class TestDeviceController(unittest.TestCase):
 
     @patch('tb_wrapper.DeviceController.Device', autospec=True)
     @patch('tb_wrapper.MainController.RestClientCE', autospec=True)
+    def test_create_device_with_customer_with_conn(self, mockClient, mockDevice):
+        conn = Mock()
+        conn.login.return_value = conn
+        mockClient.return_value = conn
+
+        c_obj_id = {'entity_type': 'CUSTOMER',
+                    'id': '9567e930-f54f-11ed-91d5-ed8a7accb44b'}
+        name = "Test_Device01"
+        device_profile_id = {'entity_type': 'DEVICE_PROFILE',
+                             'id': '94dbfce0-f54f-11ed-91d5-ed8a7accb44b'}
+
+        env = get_env()
+        mockDevice.return_value = env['device']
+        conn.save_device.return_value = env['saved_device']
+
+        dc = DeviceController(connection=conn)
+        result = dc.create_device_with_customer(
+            device_profile_id=device_profile_id, device_name=name, customer_obj_id=c_obj_id)
+
+        mockDevice.assert_called_once_with(device_profile_id=device_profile_id, name=name,
+                                           customer_id=c_obj_id)
+        assert result == env['saved_device']
+
+    @patch('tb_wrapper.DeviceController.Device', autospec=True)
+    @patch('tb_wrapper.MainController.RestClientCE', autospec=True)
     def test_create_device_without_customer(self, mockClient, mockDevice):
         conn = Mock()
         conn.login.return_value = conn
@@ -198,6 +265,29 @@ class TestDeviceController(unittest.TestCase):
 
         dc = DeviceController(
             tb_url=env['tb_url'], userfile=env['userfile'], passwordfile=env['passwordfile'])
+        result = dc.create_device_without_customer(
+            device_profile_id=device_profile_id, device_name=name)
+
+        mockDevice.assert_called_once_with(
+            device_profile_id=device_profile_id, name=name)
+        assert result == env['saved_device_nc']
+
+    @patch('tb_wrapper.DeviceController.Device', autospec=True)
+    @patch('tb_wrapper.MainController.RestClientCE', autospec=True)
+    def test_create_device_without_customer_with_conn(self, mockClient, mockDevice):
+        conn = Mock()
+        conn.login.return_value = conn
+        mockClient.return_value = conn
+
+        name = "Test_Device01"
+        device_profile_id = {'entity_type': 'DEVICE_PROFILE',
+                             'id': '94dbfce0-f54f-11ed-91d5-ed8a7accb44b'}
+
+        env = get_env()
+        mockDevice.return_value = env['device_nc']
+        conn.save_device.return_value = env['saved_device_nc']
+
+        dc = DeviceController(connection=conn)
         result = dc.create_device_without_customer(
             device_profile_id=device_profile_id, device_name=name)
 
@@ -229,6 +319,28 @@ class TestDeviceController(unittest.TestCase):
         assert result == "Attribute updates"
 
     @patch('tb_wrapper.MainController.RestClientCE', autospec=True)
+    def test_save_device_attributes_with_conn(self, mockClient):
+
+        conn = Mock()
+        conn.login.return_value = conn
+        mockClient.return_value = conn
+
+        env = get_env()
+        device_id = {'entity_type': 'DEVICE',
+                     'id': 'f0f95450-69d0-11ee-8bf0-899ee6c3e465'}
+        scope = "SERVER_SCOPE"
+        body = {'Test': 'test_save_device_attribute'}
+
+        conn.save_device_attributes.return_value = "Attribute updates"
+        dc = DeviceController(connection=conn)
+        result = dc.save_device_attributes(
+            device_id=device_id, scope=scope, body=body)
+
+        conn.save_device_attributes.assert_called_once_with(
+            device_id, scope, body)
+        assert result == "Attribute updates"
+
+    @patch('tb_wrapper.MainController.RestClientCE', autospec=True)
     def test_get_default_device_profile_info(self, mockClient):
         conn = Mock()
         conn.login.return_value = conn
@@ -239,6 +351,20 @@ class TestDeviceController(unittest.TestCase):
 
         dc = DeviceController(
             tb_url=env['tb_url'], userfile=env['userfile'], passwordfile=env['passwordfile'])
+        result = dc.get_default_device_profile_info()
+
+        assert result == env['default_profile_info']
+
+    @patch('tb_wrapper.MainController.RestClientCE', autospec=True)
+    def test_get_default_device_profile_info_with_conn(self, mockClient):
+        conn = Mock()
+        conn.login.return_value = conn
+        mockClient.return_value = conn
+
+        env = get_env()
+        conn.get_default_device_profile_info.return_value = env['default_profile_info']
+
+        dc = DeviceController(connection=conn)
         result = dc.get_default_device_profile_info()
 
         assert result == env['default_profile_info']

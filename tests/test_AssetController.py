@@ -143,6 +143,31 @@ class TestAssetController(unittest.TestCase):
             name=asset_name, asset_profile_id=assetProfileID, customer_id=customerID)
         assert result == env['saved_asset']
 
+    @patch('tb_wrapper.AssetController.Asset', autospec=True)
+    @patch('tb_wrapper.MainController.RestClientCE', autospec=True)
+    def test_create_asset_with_conn(self, mockClient, mockAsset):
+
+        conn = Mock()
+        conn.login.return_value = conn
+        mockClient.return_value = conn
+
+        asset_name = "Test"
+        assetProfileID = {'entity_type': 'ASSET_PROFILE',
+                                         'id': '94e524a0-f54f-11ed-91d5-ed8a7accb44b'}
+        customerID = {'entity_type': 'CUSTOMER',
+                      'id': '9567e930-f54f-11ed-91d5-ed8a7accb44b'}
+        env = get_env()
+        conn.save_asset.return_value = env['saved_asset']
+        mockAsset.return_value = env['asset']
+        ac = AssetController(connection=conn)
+        result = ac.create_asset(
+            asset_profile_id=assetProfileID, asset_name=asset_name, customer_obj_id=customerID)
+
+        conn.save_asset.assert_called_once_with(env['asset'])
+        mockAsset.assert_called_once_with(
+            name=asset_name, asset_profile_id=assetProfileID, customer_id=customerID)
+        assert result == env['saved_asset']
+
     @patch('tb_wrapper.AssetController.AssetProfile')
     @patch('tb_wrapper.MainController.RestClientCE', autospec=True)
     def test_create_asset_profile(self, mockClient, mockAssetProfile):
@@ -160,6 +185,26 @@ class TestAssetController(unittest.TestCase):
 
         ac = AssetController(
             tb_url=env['tb_url'], userfile=env['userfile'], passwordfile=env['passwordfile'])
+        result = ac.create_asset_profile(asset_profile_name)
+
+        assert result == env['saved_asset_profile']
+
+    @patch('tb_wrapper.AssetController.AssetProfile')
+    @patch('tb_wrapper.MainController.RestClientCE', autospec=True)
+    def test_create_asset_profile(self, mockClient, mockAssetProfile):
+
+        conn = Mock()
+        conn.login.return_value = conn
+        mockClient.return_value = conn
+        conn.get_user.tenant_id = "{'entity_type': 'TENANT','id': '94cf0490-f54f-11ed-91d5-ed8a7accb44b'}"
+        env = get_env()
+        asset_profile_name = "profile_name"
+        tenant_id = {'entity_type': 'TENANT',
+                     'id': '94cf0490-f54f-11ed-91d5-ed8a7accb44b'}
+        mockAssetProfile.return_value = env['asset_profile']
+        conn.save_asset_profile.return_value = env['saved_asset_profile']
+
+        ac = AssetController(connection=conn)
         result = ac.create_asset_profile(asset_profile_name)
 
         assert result == env['saved_asset_profile']
@@ -185,6 +230,32 @@ class TestAssetController(unittest.TestCase):
         asset_name_false = "10"
         ac = AssetController(
             tb_url=env['tb_url'], userfile=env['userfile'], passwordfile=env['passwordfile'])
+        result_false = ac.check_asset_exists_by_name(
+            asset_name=asset_name_false)
+        result_true = ac.check_asset_exists_by_name(asset_name=asset_name_true)
+        assert result_true == True
+        assert result_false == False
+
+    @patch('tb_wrapper.MainController.RestClientCE', autospec=True)
+    def test_exists_asset_by_name_with_conn(self, mockClient):
+
+        env = get_env()
+
+        conn = Mock()
+        conn.login.return_value = conn
+        mockClient.return_value = conn
+        mock_names = []
+        for i in range(0, 5):
+            m = Mock()
+            m.name = str(i)
+            mock_names.append(m)
+        mockPageAsset = Mock()
+        mockPageAsset.data = mock_names
+
+        conn.get_tenant_asset_infos.return_value = mockPageAsset
+        asset_name_true = "0"
+        asset_name_false = "10"
+        ac = AssetController(connection=conn)
         result_false = ac.check_asset_exists_by_name(
             asset_name=asset_name_false)
         result_true = ac.check_asset_exists_by_name(asset_name=asset_name_true)
@@ -219,6 +290,33 @@ class TestAssetController(unittest.TestCase):
         assert result_true == True
         assert result_false == False
 
+    @patch('tb_wrapper.MainController.RestClientCE', autospec=True)
+    def test_exists_profile_asset_by_name_with_conn(self, mockClient):
+
+        env = get_env()
+
+        conn = Mock()
+        conn.login.return_value = conn
+        mockClient.return_value = conn
+        mock_names = []
+        for i in range(0, 5):
+            m = Mock()
+            m.name = str(i)
+            mock_names.append(m)
+        mockPageAssetProfile = Mock()
+        mockPageAssetProfile.data = mock_names
+
+        conn.get_asset_profiles.return_value = mockPageAssetProfile
+        asset_name_true = "0"
+        asset_name_false = "10"
+        ac = AssetController(connection=conn)
+        result_false = ac.check_asset_profile_exists_by_name(
+            profile_name=asset_name_false)
+        result_true = ac.check_asset_profile_exists_by_name(
+            profile_name=asset_name_true)
+        assert result_true == True
+        assert result_false == False
+
     @patch('tb_wrapper.AssetController.AssetProfile', autospec=True)
     @patch('tb_wrapper.MainController.RestClientCE', autospec=True)
     def test_get_asset_profile_by_name(self, mockClient, mockAssetProfile):
@@ -238,6 +336,27 @@ class TestAssetController(unittest.TestCase):
         profile_name = "profile_name"
         ac = AssetController(
             tb_url=env['tb_url'], userfile=env['userfile'], passwordfile=env['passwordfile'])
+        result = ac.create_asset_profile(profile_name=profile_name)
+        assert result == env['saved_asset_profile']
+
+    @patch('tb_wrapper.AssetController.AssetProfile', autospec=True)
+    @patch('tb_wrapper.MainController.RestClientCE', autospec=True)
+    def test_get_asset_profile_by_name_with_conn(self, mockClient, mockAssetProfile):
+        env = get_env()
+
+        conn = Mock()
+        conn.login.return_value = conn
+        mockClient.return_value = conn
+
+        mockTenant = Mock()
+        mockTenant.tenant_id = {'entity_type': 'TENANT',
+                                'id': '94cf0490-f54f-11ed-91d5-ed8a7accb44b'}
+        conn.get_user.return_value = mockTenant
+        mockAssetProfile.return_value = env['asset_profile']
+
+        conn.save_asset_profile.return_value = env['saved_asset_profile']
+        profile_name = "profile_name"
+        ac = AssetController(connection=conn)
         result = ac.create_asset_profile(profile_name=profile_name)
         assert result == env['saved_asset_profile']
 
@@ -265,6 +384,28 @@ class TestAssetController(unittest.TestCase):
         assert result == "Attribute updates"
 
     @patch('tb_wrapper.MainController.RestClientCE', autospec=True)
+    def test_save_asset_attribute_with_conn(self, mockClient):
+
+        conn = Mock()
+        conn.login.return_value = conn
+        mockClient.return_value = conn
+
+        env = get_env()
+        asset_id = {'entity_type': 'ASSET',
+                    'id': 'bd8e5f10-6cec-11ee-8bf0-899ee6c3e465'}
+        scope = "SERVER_SCOPE"
+        body = {'Test': 'test_save_asset_attribute'}
+
+        conn.save_entity_attributes_v2.return_value = "Attribute updates"
+        ac = AssetController(connection=conn)
+        result = ac.save_asset_attributes(
+            asset_id=asset_id, scope=scope, body=body)
+
+        conn.save_entity_attributes_v2.assert_called_once_with(
+            asset_id, scope, body)
+        assert result == "Attribute updates"
+
+    @patch('tb_wrapper.MainController.RestClientCE', autospec=True)
     def test_get_tenant_asset(self, mockClient):
         conn = Mock()
         conn.login.return_value = conn
@@ -275,6 +416,20 @@ class TestAssetController(unittest.TestCase):
         conn.get_tenant_asset.return_value = env["get_tenant_asset_response"]
         ac = AssetController(
             tb_url=env['tb_url'], userfile=env['userfile'], passwordfile=env['passwordfile'])
+
+        result = ac.get_tenant_asset(asset_name=asset_name)
+        assert result == env["get_tenant_asset_response"]
+
+    @patch('tb_wrapper.MainController.RestClientCE', autospec=True)
+    def test_get_tenant_asset(self, mockClient):
+        conn = Mock()
+        conn.login.return_value = conn
+        mockClient.return_value = conn
+
+        env = get_env()
+        asset_name = "FUNCTIONS"
+        conn.get_tenant_asset.return_value = env["get_tenant_asset_response"]
+        ac = AssetController(connection=conn)
 
         result = ac.get_tenant_asset(asset_name=asset_name)
         assert result == env["get_tenant_asset_response"]

@@ -19,7 +19,7 @@ class MainController:
             self.tb_client = connection
 
     def destroyConnection(self):
-        self.tb_client.logout()
+        return self.tb_client.logout()
 
     @handle_tb_wrapper_exception
     def __check_valid_parameters(self, tb_url, userfile, passwordfile):
