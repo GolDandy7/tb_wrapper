@@ -30,7 +30,7 @@ version = "<my-version"
 ```
 Create the dist directory used to upload the package into Pypi
 ```sh
-python -m build
+python3 -m build
 ```
 Upload the new version of the package using twine
 ```sh

@@ -38,3 +38,6 @@ class DeviceController(MainController):
 
     def get_default_device_profile_info(self):
         return self.tb_client.get_default_device_profile_info()
+
+    def save_device_telemetry(self, token, body):
+        return self.tb_client.post_telemetry(token, body)
