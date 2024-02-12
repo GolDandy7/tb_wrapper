@@ -23,7 +23,7 @@ class TelemetryController(MainController):
         timeseries_data = {}
         for e in entities_keys.keys():
             result = self.tb_client.get_timeseries(
-                entity_id=EntityId(entity_type="DEVICE", id=e), keys=entities_keys[e], start_ts=start_ts, end_ts=end_ts)
+                entity_id=EntityId(entity_type="DEVICE", id=e), keys=entities_keys[e]["keys"], start_ts=start_ts, end_ts=end_ts)
             for key, values in result.items():
                 temp_data = {}
                 combined_key = f"{e}_{key}"
